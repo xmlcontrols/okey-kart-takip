@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Özel Metin2 Okey Kart Takip</title>
+  <style>
+    :root {
+      --bg-color: #0b0d12;
+      --card-bg: #161b26;
+      --border-color: #2a3447;
+      --accent-gold: #d4af37;
+      --text-muted: #8b9bb4;
+      --red-card: #e63946;
+      --blue-card: #3a86ef;
+      --yellow-card: #ffb703;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-color);
+      color: #ffffff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 650px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 15px;
+    }
+
+    header h1 {
+      color: var(--accent-gold);
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+    }
+
+    /* İstatistik ve Buton Paneli */
+    .stats-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #0f131c;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #d4af37, #f39c12);
+      transition: width 0.3s ease;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, filter 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-new { background: #27ae60; color: white; }
+    .btn-reset { background: #c0392b; color: white; }
+
+    .completed-count {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+    .completed-count strong { color: var(--accent-gold); }
+
+    /* Kart Tahtası (Grid) */
+    .card-board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+    }
+
+    .card {
+      aspect-ratio: 2/3;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+      border: 2px solid rgba(255,255,255,0.1);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    /* Renk Tanımlamaları */
+    .card.kirmizi { background: var(--red-card); color: white; }
+    .card.mavi { background: var(--blue-card); color: white; }
+    .card.sari { background: var(--yellow-card); color: #111; }
+
+    /* Atılan / Pasif Kart */
+    .card.used {
+      background: #121620 !important;
+      color: #3a4556 !important;
+      border-color: #1a2230 !important;
+      opacity: 0.35;
+      transform: scale(0.92);
+      box-shadow: none;
+    }
+
+    @media (max-width: 480px) {
+      .card-board { grid-template-columns: repeat(6, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <h1>Okey Kart Takip</h1>
+    </header>
+
+    <div class="stats-panel">
+      <div class="progress-info">
+        <span>Kalan Kart</span>
+        <strong id="cardCountText">24 / 24</strong>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-new" id="btnNewGame">Yeni Oyun (+1)</button>
+        <button class="btn btn-reset" id="btnReset">Kartları Sıfırla</button>
+      </div>
+
+      <div class="completed-count">
+        Tamamlanan Oyun: <strong id="completedGamesText">0</strong>
+      </div>
+    </div>
+
+    <div class="card-board" id="cardBoard"></div>
+  </div>
+
+  <script>
+    const COLORS = ['kirmizi', 'mavi', 'sari'];
+    const MAX_NUM = 8;
+    const TOTAL_CARDS = 24;
+
+    let usedCards = JSON.parse(localStorage.getItem('m2_used_cards')) || [];
+    let completedGames = parseInt(localStorage.getItem('m2_completed_games')) || 0;
+
+    const boardEl = document.getElementById('cardBoard');
+    const countTextEl = document.getElementById('cardCountText');
+    const fillEl = document.getElementById('progressFill');
+    const completedTextEl = document.getElementById('completedGamesText');
+
+    // Kart Tahtasını Oluştur
+    function renderBoard() {
+      boardEl.innerHTML = '';
+      
+      COLORS.forEach(color => {
+        for (let i = 1; i <= MAX_NUM; i++) {
+          const cardId = `${color}-${i}`;
+          const isUsed = usedCards.includes(cardId);
+
+          const cardEl = document.createElement('div');
+          cardEl.className = `card ${color} ${isUsed ? 'used' : ''}`;
+          cardEl.innerText = i;
+          
+          cardEl.addEventListener('click', () => toggleCard(cardId));
+          boardEl.appendChild(cardEl);
+        }
+      });
+
+      updateStats();
+    }
+
+    // Kart Durumu Değiştir
+    function toggleCard(id) {
+      if (usedCards.includes(id)) {
+        usedCards = usedCards.filter(c => c !== id);
+      } else {
+        usedCards.push(id);
+      }
+      saveAndRefresh();
+    }
+
+    // İstatistik Güncelleme
+    function updateStats() {
+      const remaining = TOTAL_CARDS - usedCards.length;
+      countTextEl.innerText = `${remaining} / ${TOTAL_CARDS}`;
+      fillEl.style.width = `${(remaining / TOTAL_CARDS) * 100}%`;
+      completedTextEl.innerText = completedGames;
+    }
+
+    // Kaydet ve Arayüzü Yenile
+    function saveAndRefresh() {
+      localStorage.setItem('m2_used_cards', JSON.stringify(usedCards));
+      localStorage.setItem('m2_completed_games', completedGames);
+      renderBoard();
+    }
+
+    // Buton Dinleyicileri
+    document.getElementById('btnReset').addEventListener('click', () => {
+      usedCards = [];
+      saveAndRefresh();
+    });
+
+    document.getElementById('btnNewGame').addEventListener('click', () => {
+      usedCards = [];
+      completedGames++;
+      saveAndRefresh();
+    });
+
+    // İlk Yükleme
+    renderBoard();
+  </script>
+</body>
+</html>
