@@ -3,155 +3,274 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Özel Metin2 Okey Kart Takip</title>
+  <title>Okey Kart Takip & Sandık Hesaplayıcı</title>
   <style>
     :root {
-      --bg-color: #0b0d12;
-      --card-bg: #161b26;
-      --border-color: #2a3447;
-      --accent-gold: #d4af37;
-      --text-muted: #8b9bb4;
+      --bg-color: #0b0e14;
+      --card-bg: #141923;
+      --border-color: #242f42;
+      --accent-gold: #e5b849;
+      --text-main: #f0f4fc;
+      --text-muted: #8292ab;
       --red-card: #e63946;
-      --blue-card: #3a86ef;
-      --yellow-card: #ffb703;
+      --blue-card: #2a75d3;
+      --yellow-card: #f4a261;
+      --red-shadow: rgba(230, 57, 70, 0.3);
+      --blue-shadow: rgba(42, 117, 211, 0.3);
+      --yellow-shadow: rgba(244, 162, 97, 0.3);
+    }
+
+    /* TEMA 2: Sohan Dağı (Buz Mavi) */
+    body.theme-sohan {
+      --bg-color: #07131e;
+      --card-bg: #0f2233;
+      --border-color: #1e3a52;
+      --accent-gold: #38bdf8;
+    }
+
+    /* TEMA 3: Koyu Kırmızı (Şeytan Kulesi) */
+    body.theme-kulle {
+      --bg-color: #120707;
+      --card-bg: #220f0f;
+      --border-color: #421b1b;
+      --accent-gold: #f87171;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       background-color: var(--bg-color);
-      color: #ffffff;
+      color: var(--text-main);
       font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
-      padding: 20px;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      user-select: none;
+      transition: background-color 0.3s ease;
     }
 
     .app-container {
       width: 100%;
-      max-width: 650px;
+      max-width: 720px;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      transition: all 0.3s ease;
     }
 
     header {
-      text-align: center;
-      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 15px;
+      padding-bottom: 16px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    header h1 {
+    .title-area h1 {
       color: var(--accent-gold);
-      font-size: 1.8rem;
+      font-size: 1.4rem;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
-      text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
     }
 
-    /* İstatistik ve Buton Paneli */
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Tema ve Ses Kontrolleri */
+    select.theme-select {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .icon-btn.active {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    /* İstatistik ve İlerleme */
     .stats-panel {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 20px;
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 12px;
     }
 
-    .progress-info {
+    .progress-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.95rem;
-      color: var(--text-muted);
     }
 
-    .progress-bar-bg {
+    .progress-numbers {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+
+    .progress-track {
       width: 100%;
       height: 10px;
-      background: #0f131c;
+      background: #090c12;
       border-radius: 5px;
       overflow: hidden;
       border: 1px solid var(--border-color);
     }
 
-    .progress-bar-fill {
+    .progress-fill {
       height: 100%;
       width: 100%;
       background: linear-gradient(90deg, #d4af37, #f39c12);
       transition: width 0.3s ease;
     }
 
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-top: 5px;
-    }
-
+    .controls { display: flex; gap: 10px; }
     .btn {
       flex: 1;
-      padding: 12px;
+      padding: 10px;
       border: none;
       border-radius: 8px;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
-      transition: transform 0.1s, filter 0.2s;
     }
-    .btn:active { transform: scale(0.97); }
+    .btn-new { background: #10b981; color: white; }
+    .btn-reset { background: #ef4444; color: white; }
 
-    .btn-new { background: #27ae60; color: white; }
-    .btn-reset { background: #c0392b; color: white; }
-
-    .completed-count {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 5px;
-    }
-    .completed-count strong { color: var(--accent-gold); }
-
-    /* Kart Tahtası (Grid) */
+    /* Kart Izgarası */
     .card-board {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
-      gap: 8px;
+      gap: 10px;
+      margin-bottom: 24px;
     }
 
     .card {
       aspect-ratio: 2/3;
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 800;
       cursor: pointer;
-      user-select: none;
-      border: 2px solid rgba(255,255,255,0.1);
+      border: 2px solid rgba(255, 255, 255, 0.15);
       transition: all 0.2s ease;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
 
-    /* Renk Tanımlamaları */
-    .card.kirmizi { background: var(--red-card); color: white; }
-    .card.mavi { background: var(--blue-card); color: white; }
-    .card.sari { background: var(--yellow-card); color: #111; }
+    .card .card-num { font-size: 1.4rem; font-weight: 900; }
+    .card .card-status { font-size: 0.55rem; font-weight: 800; display: none; margin-top: 2px; }
 
-    /* Atılan / Pasif Kart */
+    .card.kirmizi { background: linear-gradient(135deg, #e63946, #b91c1c); color: #fff; }
+    .card.mavi { background: linear-gradient(135deg, #2a75d3, #1e40af); color: #fff; }
+    .card.sari { background: linear-gradient(135deg, #f4a261, #e76f51); color: #fff; }
+
     .card.used {
-      background: #121620 !important;
-      color: #3a4556 !important;
+      background: #0f131a !important;
+      color: #3e4c61 !important;
       border-color: #1a2230 !important;
-      opacity: 0.35;
-      transform: scale(0.92);
-      box-shadow: none;
+      opacity: 0.45;
+      transform: scale(0.93);
+    }
+    .card.used .card-num { text-decoration: line-through; }
+    .card.used .card-status { display: block; color: #ef4444; }
+
+    /* SANDIK KAZANÇ HESAPLAYICI PANELDİR */
+    .chest-calculator {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
     }
 
-    @media (max-width: 480px) {
-      .card-board { grid-template-columns: repeat(6, 1fr); }
+    .chest-title {
+      color: var(--accent-gold);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chest-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .chest-box {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .chest-box label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .chest-inputs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .chest-inputs input {
+      width: 50%;
+      background: #090c12;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    .total-earnings {
+      margin-top: 12px;
+      text-align: right;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .total-earnings strong {
+      color: #10b981;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 600px) {
+      .card-board { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+      .chest-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -159,29 +278,68 @@
 
   <div class="app-container">
     <header>
-      <h1>Okey Kart Takip</h1>
+      <div class="title-area">
+        <h1>Okey Kart Takip</h1>
+      </div>
+
+      <div class="header-right">
+        <!-- TEMA SEÇENEKLERİ (Özellik #5) -->
+        <select class="theme-select" id="themeSelect">
+          <option value="default">Vahşi Doğa (Karanlık)</option>
+          <option value="sohan">Sohan Dağı (Buz)</option>
+          <option value="kulle">Şeytan Kulesi (Kırmızı)</option>
+        </select>
+
+        <!-- SESLİ UYARI BUTONU (Özellik #1) -->
+        <button class="icon-btn active" id="btnSound">🔊 Ses Açık</button>
+      </div>
     </header>
 
     <div class="stats-panel">
-      <div class="progress-info">
-        <span>Kalan Kart</span>
-        <strong id="cardCountText">24 / 24</strong>
+      <div class="progress-header">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Kalan Kartlar</span>
+        <span class="progress-numbers" id="cardCountText">24 / 24</span>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressFill"></div>
+
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
 
       <div class="controls">
-        <button class="btn btn-new" id="btnNewGame">Yeni Oyun (+1)</button>
-        <button class="btn btn-reset" id="btnReset">Kartları Sıfırla</button>
-      </div>
-
-      <div class="completed-count">
-        Tamamlanan Oyun: <strong id="completedGamesText">0</strong>
+        <button class="btn btn-new" id="btnNewGame">＋ Yeni Oyun</button>
+        <button class="btn btn-reset" id="btnReset">↻ Sıfırla</button>
       </div>
     </div>
 
+    <!-- KART TAHTASI -->
     <div class="card-board" id="cardBoard"></div>
+
+    <!-- SANDIK KAZANÇ HESAPLAYICI (Özellik #3) -->
+    <div class="chest-calculator">
+      <div class="chest-title">📦 Okey Sandığı Kazanç Hesaplayıcı</div>
+      
+      <div class="chest-grid">
+        <div class="chest-box">
+          <label>🥈 Gümüş Sandık (Adet / Fiyat Won)</label>
+          <div class="chest-inputs">
+            <input type="number" id="silverQty" placeholder="Adet" min="0" value="0">
+            <input type="number" id="silverPrice" placeholder="Won" step="0.1" min="0" value="0.5">
+          </div>
+        </div>
+
+        <div class="chest-box">
+          <label>🥇 Altın Sandık (Adet / Fiyat Won)</label>
+          <div class="chest-inputs">
+            <input type="number" id="goldQty" placeholder="Adet" min="0" value="0">
+            <input type="number" id="goldPrice" placeholder="Won" step="0.1" min="0" value="3.5">
+          </div>
+        </div>
+      </div>
+
+      <div class="total-earnings">
+        Tahmini Toplam Kazanç: <strong id="totalWon">0.0 Won</strong>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -189,18 +347,37 @@
     const MAX_NUM = 8;
     const TOTAL_CARDS = 24;
 
-    let usedCards = JSON.parse(localStorage.getItem('m2_used_cards')) || [];
-    let completedGames = parseInt(localStorage.getItem('m2_completed_games')) || 0;
+    let usedCards = JSON.parse(localStorage.getItem('m2_okey_used')) || [];
+    let soundEnabled = true;
+
+    // Web Audio API ile Ses Sentezi (Dışarıdan ses dosyası yüklemeye gerek kalmaz)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClickSound(freq = 600, duration = 0.05) {
+      if (!soundEnabled) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playAlertSound() {
+      if (!soundEnabled) return;
+      playClickSound(800, 0.1);
+      setTimeout(() => playClickSound(1200, 0.15), 100);
+    }
 
     const boardEl = document.getElementById('cardBoard');
     const countTextEl = document.getElementById('cardCountText');
     const fillEl = document.getElementById('progressFill');
-    const completedTextEl = document.getElementById('completedGamesText');
 
-    // Kart Tahtasını Oluştur
     function renderBoard() {
       boardEl.innerHTML = '';
-      
       COLORS.forEach(color => {
         for (let i = 1; i <= MAX_NUM; i++) {
           const cardId = `${color}-${i}`;
@@ -208,54 +385,86 @@
 
           const cardEl = document.createElement('div');
           cardEl.className = `card ${color} ${isUsed ? 'used' : ''}`;
-          cardEl.innerText = i;
+          cardEl.innerHTML = `<span class="card-num">${i}</span><span class="card-status">GİTTİ</span>`;
           
           cardEl.addEventListener('click', () => toggleCard(cardId));
           boardEl.appendChild(cardEl);
         }
       });
-
       updateStats();
     }
 
-    // Kart Durumu Değiştir
     function toggleCard(id) {
       if (usedCards.includes(id)) {
         usedCards = usedCards.filter(c => c !== id);
+        playClickSound(400); // Kart geri açılma sesi
       } else {
         usedCards.push(id);
+        playClickSound(700); // Kart atılma sesi
       }
+
+      // Kalan kart azaldığında özel sesli uyarı
+      if (TOTAL_CARDS - usedCards.length === 3) {
+        playAlertSound();
+      }
+
       saveAndRefresh();
     }
 
-    // İstatistik Güncelleme
     function updateStats() {
       const remaining = TOTAL_CARDS - usedCards.length;
       countTextEl.innerText = `${remaining} / ${TOTAL_CARDS}`;
       fillEl.style.width = `${(remaining / TOTAL_CARDS) * 100}%`;
-      completedTextEl.innerText = completedGames;
     }
 
-    // Kaydet ve Arayüzü Yenile
     function saveAndRefresh() {
-      localStorage.setItem('m2_used_cards', JSON.stringify(usedCards));
-      localStorage.setItem('m2_completed_games', completedGames);
+      localStorage.setItem('m2_okey_used', JSON.stringify(usedCards));
       renderBoard();
     }
 
-    // Buton Dinleyicileri
+    // Kazanç Hesaplayıcı Mantığı
+    function calculateEarnings() {
+      const sQty = parseFloat(document.getElementById('silverQty').value) || 0;
+      const sPrice = parseFloat(document.getElementById('silverPrice').value) || 0;
+      const gQty = parseFloat(document.getElementById('goldQty').value) || 0;
+      const gPrice = parseFloat(document.getElementById('goldPrice').value) || 0;
+
+      const total = (sQty * sPrice) + (gQty * gPrice);
+      document.getElementById('totalWon').innerText = `${total.toFixed(2)} Won`;
+    }
+
+    ['silverQty', 'silverPrice', 'goldQty', 'goldPrice'].forEach(id => {
+      document.getElementById(id).addEventListener('input', calculateEarnings);
+    });
+
+    // Tema Değiştirici
+    document.getElementById('themeSelect').addEventListener('change', (e) => {
+      document.body.className = '';
+      if (e.target.value !== 'default') {
+        document.body.classList.add(`theme-${e.target.value}`);
+      }
+    });
+
+    // Ses Aç/Kapat
+    const btnSound = document.getElementById('btnSound');
+    btnSound.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      btnSound.innerText = soundEnabled ? '🔊 Ses Açık' : '🔇 Ses Kapalı';
+      btnSound.classList.toggle('active', soundEnabled);
+    });
+
     document.getElementById('btnReset').addEventListener('click', () => {
       usedCards = [];
+      playClickSound(300);
       saveAndRefresh();
     });
 
     document.getElementById('btnNewGame').addEventListener('click', () => {
       usedCards = [];
-      completedGames++;
+      playAlertSound();
       saveAndRefresh();
     });
 
-    // İlk Yükleme
     renderBoard();
   </script>
 </body>
